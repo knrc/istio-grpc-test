@@ -99,6 +99,7 @@ help:
 	@echo "  build        - Build server and client binaries"
 	@echo "  docker-build - Build Docker images"
 	@echo "  docker-push  - Push Docker images to registry"
+	@echo "  kind-push    - Push Docker images to local kind cluster"
 	@echo "  run-server   - Run server locally"
 	@echo "  run-client   - Run client locally"
 	@echo "  clean        - Remove generated files and images"

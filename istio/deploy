@@ -1,0 +1,28 @@
+DIR="$(cd $(dirname $0) ; pwd -P)"
+
+SERVER_NS=test-server
+CLIENT_NS=test-client
+
+kubectl create -f "${DIR}/server_namespace.yaml"
+
+for index in 1 2 ; do
+  cat "${DIR}/server.yaml" | sed -e 's+INDEX+'${index}'+' | kubectl create -n "${SERVER_NS}" -f -
+  kubectl wait --for=jsonpath='{.status.readyReplicas}'=1 -n "${SERVER_NS}" deploy/grpc-server-${index}
+done
+
+serverIP1="$(kubectl get svc -n "${SERVER_NS}" -o jsonpath='{.spec.clusterIP}' grpc-server-1-service)"
+serverIP2="$(kubectl get svc -n "${SERVER_NS}" -o jsonpath='{.spec.clusterIP}' grpc-server-2-service)"
+
+echo serverIP1: ${serverIP1}
+echo serverIP2: ${serverIP2}
+
+kubectl create -f "${DIR}/client_namespace.yaml"
+
+cat "${DIR}/service_entry.yaml" | sed -e 's+^\(.*\)GRPC_SERVER_ENDPOINTS+\1- address: '${serverIP1}'\n\1- address: '${serverIP2}'+' | kubectl create -n "${CLIENT_NS}" -f -
+
+kubectl create -n "${CLIENT_NS}" -f "${DIR}/virtual_service.yaml"
+kubectl create -n "${CLIENT_NS}" -f "${DIR}/destination_rule.yaml"
+
+kubectl create -n "${CLIENT_NS}" -f "${DIR}/client.yaml"
+
+kubectl wait --for=jsonpath='{.status.readyReplicas}'=1 -n "${CLIENT_NS}" deploy/grpc-client

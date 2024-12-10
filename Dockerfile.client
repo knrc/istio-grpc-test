@@ -1,0 +1,37 @@
+# Build stage
+FROM golang:1.23-alpine AS builder
+
+# Set working directory
+WORKDIR /app
+
+# Copy go mod and sum files
+COPY go.mod go.sum ./
+
+# Download dependencies
+RUN go mod download
+
+# Copy the source code
+COPY . .
+
+# Generate protobuf files
+RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+RUN go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+RUN go get google.golang.org/protobuf/cmd/protoc-gen-go
+RUN go get google.golang.org/grpc/cmd/protoc-gen-go-grpc
+
+# Build the application
+RUN CGO_ENABLED=0 GOOS=linux go build -o /client cmd/client/main.go
+
+# Final stage
+FROM alpine:latest
+
+# Install certificates
+RUN apk --no-cache add ca-certificates
+
+WORKDIR /root/
+
+# Copy the pre-built binary file from the previous stage
+COPY --from=builder /client .
+
+# Command to run the executable
+ENTRYPOINT ["./client"]

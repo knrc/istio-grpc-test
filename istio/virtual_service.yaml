@@ -1,0 +1,15 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: grpc-server-vs
+spec:
+  hosts:
+    - grpc-server.internal
+  http:
+    - match:
+        - port: 50050
+      route:
+        - destination:
+            host: grpc-server.internal
+            port:
+              number: 50050

@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grpc-server-INDEX
+  labels:
+    appIndex: "INDEX"
+    app: grpc-server
+spec:
+  #replicas: 2
+  selector:
+    matchLabels:
+      appIndex: "INDEX"
+      app: grpc-server
+  template:
+    metadata:
+      labels:
+        appIndex: "INDEX"
+        app: grpc-server
+    spec:
+      containers:
+      - name: grpc-server
+        image: local/grpc-server:0.1.0
+        ports:
+        - containerPort: 50050
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 250m
+            memory: 256Mi
+        livenessProbe:
+          tcpSocket:
+            port: 50050
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          tcpSocket:
+            port: 50050
+          initialDelaySeconds: 5
+          periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grpc-server-INDEX-service
+spec:
+  selector:
+    appIndex: "INDEX"
+    app: grpc-server
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: 50050
+      targetPort: 50050

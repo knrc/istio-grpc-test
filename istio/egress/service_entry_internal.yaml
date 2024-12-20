@@ -1,0 +1,14 @@
+apiVersion: networking.istio.io/v1
+kind: ServiceEntry
+metadata:
+  name: grpc-server-internal
+spec:
+  hosts:
+  - grpc-server.internal
+  ports:
+  - name: grpc
+    number: 50050
+    protocol: HTTP
+  resolution: STATIC
+  endpoints:
+    GRPC_SERVER_ENDPOINTS

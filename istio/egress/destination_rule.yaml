@@ -1,0 +1,23 @@
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: grpc-server-dr
+spec:
+  host: grpc-server.internal
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 100
+        connectTimeout: 300ms
+      http:
+        h2UpgradePolicy: UPGRADE
+        idleTimeout: 5m
+        maxRetries: 1
+    outlierDetection:
+      consecutive5xxErrors: 5
+      interval: 5s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 100
+      minHealthPercent: 0
+    loadBalancer:
+      simple: ROUND_ROBIN

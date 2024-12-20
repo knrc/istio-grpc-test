@@ -1,0 +1,29 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: grpc-server-vs
+spec:
+  hosts:
+  - grpc-server.internal
+  gateways:
+  - grpc-server-egressgateway
+  - mesh
+  http:
+  - match:
+    - gateways:
+      - mesh
+      port: 50050
+    route:
+    - destination:
+        host: istio-egressgateway.istio-system.svc.cluster.local
+        port:
+          number: 50050
+  - match:
+    - gateways:
+      - grpc-server-egressgateway
+      port: 50050
+    route:
+    - destination:
+        host: grpc-server.internal
+        port:
+          number: 50050

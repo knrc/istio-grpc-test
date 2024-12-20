@@ -1,0 +1,8 @@
+
+date ; echo "Scaling grpc-server-1 to 0" ; kubectl scale --replicas=0 -n test-server deployment grpc-server-1
+read
+date ; echo "Scaling grpc-server-1 to 1" ; kubectl scale --replicas=1 -n test-server deployment grpc-server-1
+read
+date ; echo "Scaling grpc-server-2 to 0" ; kubectl scale --replicas=0 -n test-server deployment grpc-server-2
+read
+date ; echo "Scaling grpc-server-2 to 1" ; kubectl scale --replicas=1 -n test-server deployment grpc-server-2
